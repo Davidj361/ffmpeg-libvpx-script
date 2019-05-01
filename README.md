@@ -1,6 +1,7 @@
 # FFMPEG WebM libvpx (v8) Bash Script
-## **IMPORTANT**: Change the threads variable to how many cores your CPU has.
-### NOTE: Time stamps only work for minutes and seconds, not hours and so on.
+## IMPORTANT
+#### Change the threads variable to how many cores your CPU has.
+#### Time stamps only work for minutes and seconds, not hours and so on.
 
 ## What it does & How it works
 The script will try to encode a webm via libvpx (and libvorbis if audio enabled) with the best possible quality given a file size limit in MiB and will degrade and even provide a cut version if the output still does not fit the given file size limit. It will use the slowest and most CPU demanding options.
