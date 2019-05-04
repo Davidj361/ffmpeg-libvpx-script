@@ -16,7 +16,8 @@ The script will try to encode a webm via libvpx (and libvorbis if audio enabled)
 * Make a cut version that is limited by the given file size limit
 
 ## How to use
-libvpx.sh [-ss 1] [-to 2 | -t 2] [-scale 720] [-samesubs | -subs file] [-title title] [-audio] input_file output_file filelimit_in_MiB
+libvpx.sh [-ss 1] [-to 2 | -t 2] [-scale 720] [-samesubs | -subs file] [-title title] [-audio] [-brchange] input_file output_file filelimit_in_MiB
+
 
 *-ss and -t/-to should be in the same order*
 
@@ -29,6 +30,7 @@ libvpx.sh [-ss 1] [-to 2 | -t 2] [-scale 720] [-samesubs | -subs file] [-title t
 * -samesubs uses the same input for hardcoding subtitles
 * -subs uses a given file as input for hardcoding subtitles
 * -title gives a metadata title manually, normally the encoded file will take the same metadata tile or give it one from the input_file's filename
+* -brchange changes the target bitrate if the encoding is within 5% of the target filesize, use this if you prefer resolution over quality
 
 ## Configuration
 
