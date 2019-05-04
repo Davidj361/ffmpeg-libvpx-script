@@ -17,7 +17,7 @@
 #set -x # for debugging
 scriptname=$(basename "$0")
 if (($# == 0)); then
-    echo "$scriptname"' [-ss 1] [-to 2 | -t 2] [-scale 720] [-samesubs | -subs file] [-title title] [-audio] input_file output_file filelimit_in_MiB'
+    echo "$scriptname"' [-ss 1] [-to 2 | -t 2] [-scale 720] [-samesubs | -subs file] [-title title] [-audio] [-brchange] input_file output_file filelimit_in_MiB'
     echo "-ss and -t/-to should be in the same order"
     exit 1
 fi
@@ -30,6 +30,7 @@ duration=""
 start=""
 filter=("" "") # 0 = scale, 1 = subs
 title=""
+brchange=""
 while :; do
     case "$1" in
 	-scale)
@@ -47,6 +48,9 @@ while :; do
 	    ;;
 	-audio)
 	    audio=true
+	    ;;
+	-brchange)
+	    brchange=true
 	    ;;
 	-ss)
 	    trimArr[0]="-ss $2"
@@ -176,14 +180,16 @@ function ffmpegcmd() {
     ffmpeg $trim -i "$input" -c:v libvpx "${audiocmd[@]}" "${bitratecmd[@]}" "${qmax[@]}" -fs "$outputLimitSize"k -auto-alt-ref 1 -lag-in-frames 25 "${args[@]}" -sws_flags lanczos -sn -metadata title="$title" -pass 2 -passlogfile "$logfile" -threads $threads -speed 0 -quality best -v error -stats "$output" -y
     { set +x; } 2>/dev/null
     updateFilesize
-    # Is the file size 5% or less distance to the file limit?
-    local diff=""
-    diff=$(awk -v filesize=$filesize -v filelimit=$filelimit 'function abs(v) {return (v < 0) ? -v : v} BEGIN { printf "%.0f", (abs(filesize - filelimit) / filelimit) * 100 }')
-    if [[ "$newbitrateTries" -lt 1 ]] && isOverFilelimit && [[ "$diff" -le 5 ]]; then
-	echo File size is 5% away from target, adjusting bitrate...
-	lowerBitrate
-	ffmpegcmd
-	restoreBitrate
+    if [[ -n "$brchange" ]]; then
+	# Is the file size 5% or less distance to the file limit?
+	local diff=""
+	diff=$(awk -v filesize=$filesize -v filelimit=$filelimit 'function abs(v) {return (v < 0) ? -v : v} BEGIN { printf "%.0f", (abs(filesize - filelimit) / filelimit) * 100 }')
+	if [[ "$newbitrateTries" -lt 1 ]] && isOverFilelimit && [[ "$diff" -le 5 ]]; then
+	    echo File size is 5% away from target, adjusting bitrate...
+	    lowerBitrate
+	    ffmpegcmd
+	    restoreBitrate
+	fi
     fi
 }
 
@@ -298,18 +304,19 @@ declare -A qmaxMap
 qmaxMap[480]="30 40"
 qmaxMap[360]="40"
 qmaxMap[240]="40"
-downscaleLoop 480 360 240
+qmaxMap[144]="40"
+downscaleLoop 480 360 240 144
 
 # If still too large, disable qmax all together
 if isOverFilelimit; then
     echo Disabling qmax...
     unset qmax
-    downscaleLoop 480 360 240
+    downscaleLoop 480 360 240 144
 fi
 
 # if still too large, limit by filesize
 if isOverFilelimit; then
-    local cutOutput=cut-"$output"
+    cutOutput="cut-$output"
     echo File still was too large.
     echo Making a "$cutOutput" file...
     readlink -f "$cutOutput"
