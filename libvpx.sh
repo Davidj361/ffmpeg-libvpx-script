@@ -86,7 +86,8 @@ while :; do
 				seconds=$(echo "$2" | awk -F: '{print $2}')
 				duration=$(awk -v minutes=$minutes -v seconds=$seconds -v start=$start 'BEGIN { print (minutes * 60) + seconds - start }')
 			else
-				duration=$(awk -v time:$2 -v start=$start 'BEGIN { print time - start }')
+				time=0
+				duration=$(awk -v time=$2 -v start=$start 'BEGIN { print time - start }')
 			fi
 			trimArr[1]="-t $duration"
 			shift
