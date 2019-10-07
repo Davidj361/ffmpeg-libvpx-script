@@ -1,4 +1,4 @@
-# FFMPEG WebM libvpx (v8) Bash Script
+# FFMPEG WebM libvpx (vp8) Bash Script
 ## IMPORTANT
 #### Change the threads variable to how many cores your CPU has.
 #### Time stamps only work for minutes and seconds, not hours and so on.
