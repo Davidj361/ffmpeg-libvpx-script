@@ -36,7 +36,7 @@ while :; do
 	case "$1" in
 		-scale)
 			scaleratio="$2"
-			filters[0]=scale=-1:"$scale"
+			filters[0]=scale=-1:"$scaleratio"
 			#scale="-vf scale=-1:$scaleratio"
 			shift
 			;;
